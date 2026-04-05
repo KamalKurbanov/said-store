@@ -34,9 +34,9 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose }) => {
       path: '/pnl',
     },
     {
-      text: 'Выгрузка',
+      text: 'Загрузки',
       icon: <CloudUploadIcon />,
-      path: '/export',
+      path: '/uploads',
     },
   ];
 

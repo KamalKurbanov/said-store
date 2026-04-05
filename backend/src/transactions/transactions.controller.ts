@@ -6,9 +6,11 @@ import {
   Delete,
   Body,
   Param,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Response } from 'express';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto, UpdateTransactionDto } from './dto/transaction.dto';
 
@@ -20,6 +22,20 @@ export class TransactionsController {
   @Get()
   async findAll() {
     return this.transactionsService.findAll();
+  }
+
+  @Get('export')
+  async exportExcel(@Res() res: Response) {
+    const buffer = await this.transactionsService.exportToExcel();
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=pnl_report_${new Date().toISOString().slice(0, 10)}.xlsx`,
+    );
+    res.send(buffer);
   }
 
   @Post()

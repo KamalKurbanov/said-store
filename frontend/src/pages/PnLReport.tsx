@@ -30,6 +30,7 @@ import {
   Edit as EditIcon,
   Save as SaveIcon,
   Cancel as CancelIcon,
+  GetApp as GetAppIcon,
 } from '@mui/icons-material';
 import { MaterialReactTable, type MRT_ColumnDef } from 'material-react-table';
 import {
@@ -37,6 +38,7 @@ import {
   useCreateTransaction,
   useUpdateTransaction,
   useDeleteTransaction,
+  useExportTransactions,
 } from '../api/api-hooks';
 import type { Transaction } from '../api/api-client';
 
@@ -77,6 +79,7 @@ const PnLReport: React.FC = () => {
   const createMutation = useCreateTransaction();
   const updateMutation = useUpdateTransaction();
   const deleteMutation = useDeleteTransaction();
+  const exportMutation = useExportTransactions();
 
   // Форма добавления
   const [form, setForm] = useState(emptyForm);
@@ -422,7 +425,18 @@ const PnLReport: React.FC = () => {
 
       {/* Transactions Table */}
       <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-        <Typography variant="h5" sx={{ mb: 2 }}>Транзакции</Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h5">Транзакции</Typography>
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={exportMutation.isPending ? <CircularProgress size={16} /> : <GetAppIcon />}
+            onClick={() => exportMutation.mutate()}
+            disabled={exportMutation.isPending || transactions.length === 0}
+          >
+            Выгрузить в Excel
+          </Button>
+        </Box>
 
         <MaterialReactTable
           columns={columns}

@@ -102,3 +102,20 @@ export function useDeleteTransaction() {
     },
   });
 }
+
+export function useExportTransactions() {
+  return useMutation({
+    mutationFn: transactionsApi.exportExcel,
+    onSuccess: async (blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const date = new Date().toISOString().slice(0, 10);
+      link.setAttribute('download', `pnl_report_${date}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    },
+  });
+}

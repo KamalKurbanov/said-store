@@ -16,7 +16,7 @@ import {
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Dashboard from './pages/Dashboard';
 import PnLReport from './pages/PnLReport';
-import Export from './pages/Export';
+import Uploads from './pages/Uploads';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
@@ -60,7 +60,7 @@ const AppContent: React.FC = () => {
         }>
           <Route index element={<Navigate to="/pnl" replace />} />
           <Route path="pnl" element={<PnLReport />} />
-          <Route path="export" element={<Export />} />
+          <Route path="uploads" element={<Uploads />} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
@@ -71,6 +71,9 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => (
   <ThemeProvider theme={theme}>
     <CssBaseline />
+    <style>{`
+      html, body, #root { height: auto; min-height: 100%; overflow-y: auto; }
+    `}</style>
     <QueryClientProvider client={queryClient}>
       <Router>
         <AuthProvider>

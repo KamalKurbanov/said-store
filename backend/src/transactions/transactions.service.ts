@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import * as XLSX from 'xlsx';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto, UpdateTransactionDto } from './dto/transaction.dto';
 
@@ -86,5 +87,54 @@ export class TransactionsService {
     if (!existing) throw new NotFoundException('Транзакция не найдена');
     await this.prisma.transaction.delete({ where: { id } });
     return { success: true, id };
+  }
+
+  async exportToExcel(): Promise<Buffer> {
+    const transactions = await this.prisma.transaction.findMany({
+      orderBy: { date: 'desc' },
+    });
+
+    const typeLabels: Record<string, string> = { INCOME: 'Доход', EXPENSE: 'Расход' };
+    const paymentLabels: Record<string, string> = { CARD: 'Карта', CASH: 'Наличные', INVOICE: 'Счёт' };
+    const statusLabels: Record<string, string> = { CONFIRMED: 'Подтверждено', PENDING: 'В обработке', CANCELLED: 'Отменено' };
+
+    const rows: Record<string, string | number>[] = transactions.map((tx) => ({
+      'Дата': tx.date.toISOString().slice(0, 10),
+      'Тип': typeLabels[tx.type] || tx.type,
+      'Категория': tx.category,
+      'Сумма': Number(tx.amount),
+      'Способ оплаты': paymentLabels[tx.paymentMethod] || tx.paymentMethod,
+      'Описание': tx.description || '',
+      'Статус': statusLabels[tx.status] || tx.status,
+    }));
+
+    // Итоговые строки
+    const totalIncome = transactions
+      .filter((t) => t.type === 'INCOME')
+      .reduce((s, t) => s + Number(t.amount), 0);
+    const totalExpense = transactions
+      .filter((t) => t.type === 'EXPENSE')
+      .reduce((s, t) => s + Number(t.amount), 0);
+
+    rows.push({ 'Дата': '', 'Тип': 'ИТОГО', 'Категория': '', 'Сумма': totalIncome - totalExpense, 'Способ оплаты': '', 'Описание': '', 'Статус': '' });
+    rows.push({ 'Дата': '', 'Тип': 'Общий доход', 'Категория': '', 'Сумма': totalIncome, 'Способ оплаты': '', 'Описание': '', 'Статус': '' });
+    rows.push({ 'Дата': '', 'Тип': 'Общий расход', 'Категория': '', 'Сумма': totalExpense, 'Способ оплаты': '', 'Описание': '', 'Статус': '' });
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'P&L Отчёт');
+
+    // Ширина колонок
+    ws['!cols'] = [
+      { wch: 12 }, // Дата
+      { wch: 14 }, // Тип
+      { wch: 22 }, // Категория
+      { wch: 14 }, // Сумма
+      { wch: 16 }, // Способ оплаты
+      { wch: 35 }, // Описание
+      { wch: 16 }, // Статус
+    ];
+
+    return XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
   }
 }
