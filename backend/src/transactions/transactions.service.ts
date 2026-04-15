@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import * as XLSX from 'xlsx';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto, UpdateTransactionDto } from './dto/transaction.dto';
@@ -49,9 +49,27 @@ export class TransactionsService {
     return transactions.map(fromPrisma);
   }
 
-  async create(data: CreateTransactionDto) {
+  async findAllByUser(userId: string) {
+    const transactions = await this.prisma.transaction.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+    return transactions.map(fromPrisma);
+  }
+
+  async findAllByRestaurant(restaurantId: string) {
+    const transactions = await this.prisma.transaction.findMany({
+      where: { restaurantId },
+      orderBy: { createdAt: 'desc' },
+    });
+    return transactions.map(fromPrisma);
+  }
+
+  async create(data: CreateTransactionDto, userId: string, restaurantId: string) {
     const transaction = await this.prisma.transaction.create({
       data: {
+        userId,
+        restaurantId,
         type: toPrismaType(data.type),
         category: data.category,
         amount: data.amount,
@@ -63,9 +81,19 @@ export class TransactionsService {
     return fromPrisma(transaction);
   }
 
-  async update(id: string, data: UpdateTransactionDto) {
+  async update(id: string, data: UpdateTransactionDto, userId: string, restaurantId: string | null, isAdmin: boolean) {
     const existing = await this.prisma.transaction.findUnique({ where: { id } });
-    if (!existing) throw new NotFoundException('Транзакция не найдена');
+    if (!existing) throw new NotFoundException('Transaction not found');
+
+    // Check that transaction belongs to user's restaurant (if not admin)
+    if (!isAdmin) {
+      const belongsToRestaurant = !restaurantId || existing.restaurantId === restaurantId;
+      const belongsToUser = existing.userId === userId;
+      
+      if (!belongsToRestaurant && !belongsToUser) {
+        throw new ForbiddenException('You do not have permission to edit this transaction');
+      }
+    }
 
     const updateData: any = {};
     if (data.type) updateData.type = toPrismaType(data.type);
@@ -82,15 +110,36 @@ export class TransactionsService {
     return fromPrisma(transaction);
   }
 
-  async remove(id: string) {
+  async remove(id: string, userId: string, restaurantId: string | null, isAdmin: boolean) {
     const existing = await this.prisma.transaction.findUnique({ where: { id } });
-    if (!existing) throw new NotFoundException('Транзакция не найдена');
+    if (!existing) throw new NotFoundException('Transaction not found');
+
+    // Check that transaction belongs to user's restaurant (if not admin)
+    if (!isAdmin) {
+      const belongsToRestaurant = !restaurantId || existing.restaurantId === restaurantId;
+      const belongsToUser = existing.userId === userId;
+      
+      if (!belongsToRestaurant && !belongsToUser) {
+        throw new ForbiddenException('You do not have permission to delete this transaction');
+      }
+    }
+
     await this.prisma.transaction.delete({ where: { id } });
     return { success: true, id };
   }
 
-  async exportToExcel(): Promise<Buffer> {
+  async exportToExcel(userId?: string): Promise<Buffer> {
+    const where = userId ? { userId } : {};
+    return this.generateExcel(where);
+  }
+
+  async exportToExcelByRestaurant(restaurantId: string): Promise<Buffer> {
+    return this.generateExcel({ restaurantId });
+  }
+
+  private async generateExcel(where: any): Promise<Buffer> {
     const transactions = await this.prisma.transaction.findMany({
+      where,
       orderBy: { date: 'desc' },
     });
 

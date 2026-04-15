@@ -12,12 +12,12 @@ import {
   Menu as MenuIcon,
 } from '@mui/icons-material';
 import { Outlet } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-
-const drawerWidth = 260;
+import { Sidebar, drawerWidth, drawerCollapsedWidth } from '../components/Sidebar';
+import styles from './Dashboard.module.css';
 
 const Dashboard: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -25,16 +25,23 @@ const Dashboard: React.FC = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  const handleToggleCollapsed = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
+  const currentDrawerWidth = sidebarCollapsed ? drawerCollapsedWidth : drawerWidth;
+
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box className={styles.dashboard}>
       <AppBar
         position="fixed"
+        className={styles.appBar}
         sx={{
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-          ml: { md: `${drawerWidth}px` },
+          width: { md: `calc(100% - ${currentDrawerWidth}px)` },
+          ml: { md: `${currentDrawerWidth}px` },
         }}
       >
-        <Toolbar>
+        <Toolbar className={styles.toolbar}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -44,21 +51,24 @@ const Dashboard: React.FC = () => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="body1" className={styles.toolbarTitle} sx={{ flexGrow: 1 }}>
             {isMobile ? 'Меню' : 'Coffe Dashboard'}
           </Typography>
         </Toolbar>
       </AppBar>
-      
-      <Sidebar mobileOpen={mobileOpen} onClose={handleDrawerToggle} />
-      
+
+      <Sidebar
+        mobileOpen={mobileOpen}
+        onClose={handleDrawerToggle}
+        collapsed={sidebarCollapsed}
+        onToggleCollapsed={handleToggleCollapsed}
+      />
+
       <Box
         component="main"
+        className={styles.mainContent}
         sx={{
-          flexGrow: 1,
-          p: 3,
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-          mt: 8,
+          width: { md: `calc(100% - ${currentDrawerWidth}px)` },
         }}
       >
         <Outlet />

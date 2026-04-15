@@ -1,0 +1,82 @@
+/* ==========================================
+   Uber Design System Tokens
+   Based on DESIGN.md — Uber-inspired design
+   ========================================== */
+
+:root {
+  /* --- Color Palette (Strict Black & White) --- */
+  --uber-black: #000000;
+  --uber-white: #ffffff;
+  --body-gray: #4b4b4b;
+  --muted-gray: #afafaf;
+  --hover-gray: #e2e2e2;
+  --hover-light: #f3f3f3;
+  --chip-gray: #efefef;
+
+  /* --- Shadows (Whisper-soft) --- */
+  --shadow-light: rgba(0, 0, 0, 0.12) 0px 4px 16px 0px;
+  --shadow-medium: rgba(0, 0, 0, 0.16) 0px 4px 16px 0px;
+  --shadow-floating: rgba(0, 0, 0, 0.16) 0px 2px 8px 0px;
+  --shadow-pressed: rgba(0, 0, 0, 0.08) inset 0px 0px 0px 999px;
+  --focus-ring: rgb(255, 255, 255) 0px 0px 0px 2px inset;
+
+  /* --- Spacing (8px base unit) --- */
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-14: 14px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  --space-64: 64px;
+
+  /* --- Border Radius --- */
+  --radius-standard: 8px;
+  --radius-comfortable: 12px;
+  --radius-pill: 999px;
+  --radius-circle: 50%;
+
+  /* --- Typography --- */
+  --font-display: "UberMove", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-text: "UberMoveText", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  /* Font sizes */
+  --text-display-hero: 3.25rem;   /* 52px */
+  --text-section-heading: 2.25rem; /* 36px */
+  --text-card-title: 2rem;         /* 32px */
+  --text-sub-heading: 1.5rem;      /* 24px */
+  --text-small-heading: 1.25rem;   /* 20px */
+  --text-nav-ui: 1.125rem;         /* 18px */
+  --text-body-button: 1rem;        /* 16px */
+  --text-caption: 0.875rem;        /* 14px */
+  --text-micro: 0.75rem;           /* 12px */
+
+  /* Line heights */
+  --lh-display: 1.23;
+  --lh-section: 1.22;
+  --lh-card-title: 1.25;
+  --lh-sub-heading: 1.33;
+  --lh-small-heading: 1.40;
+  --lh-nav-ui: 1.33;
+  --lh-body: 1.50;
+  --lh-button: 1.25;
+  --lh-caption: 1.43;
+  --lh-micro: 1.67;
+
+  /* --- Font weights --- */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+
+  /* --- Transitions --- */
+  --transition-fast: 150ms ease;
+  --transition-standard: 200ms ease;
+
+  /* --- Container --- */
+  --max-content-width: 1136px;
+}

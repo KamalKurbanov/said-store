@@ -1,0 +1,168 @@
+/* Uploads Uber-inspired styles */
+
+.pageContainer {
+  max-width: 1136px;
+  margin: 0 auto;
+}
+
+.pageHeader {
+  text-align: left;
+  margin-bottom: 32px;
+}
+
+.pageTitle {
+  font-family: "UberMove", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 2.25rem; /* 36px */
+  font-weight: 700;
+  line-height: 1.22;
+  color: #000000;
+  margin: 0 0 8px 0;
+}
+
+.pageSubtitle {
+  font-family: "UberMoveText", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1rem; /* 16px */
+  font-weight: 400;
+  line-height: 1.50;
+  color: #4b4b4b;
+  margin: 0;
+}
+
+.section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 16px 0px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+
+.sectionIcon {
+  color: #000000;
+}
+
+.sectionTitle {
+  font-family: "UberMove", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.25rem; /* 20px */
+  font-weight: 700;
+  line-height: 1.40;
+  color: #000000;
+  margin: 0;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 960px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.summaryCard {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 16px 0px;
+  transition: box-shadow 200ms ease;
+}
+
+.summaryCard:hover {
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 4px 16px 0px;
+}
+
+.summaryCardIcon {
+  display: inline-flex;
+  padding: 8px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.summaryCardTitle {
+  font-family: "UberMoveText", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.875rem; /* 14px */
+  font-weight: 400;
+  line-height: 1.43;
+  color: #4b4b4b;
+  margin: 0 0 4px 0;
+}
+
+.summaryCardValue {
+  font-family: "UberMove", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.5rem; /* 24px */
+  font-weight: 700;
+  line-height: 1.33;
+  color: #000000;
+  margin: 0;
+}
+
+.chartsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 960px) {
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chartCard {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 16px 0px;
+}
+
+.chartTitle {
+  font-family: "UberMove", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1rem; /* 16px */
+  font-weight: 700;
+  line-height: 1.25;
+  color: #000000;
+  margin: 0 0 16px 0;
+}
+
+.tableSection {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 16px 0px;
+}
+
+.tableTitle {
+  font-family: "UberMove", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.25rem; /* 20px */
+  font-weight: 700;
+  line-height: 1.40;
+  color: #000000;
+  margin: 0 0 16px 0;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.uploadSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px;
+}

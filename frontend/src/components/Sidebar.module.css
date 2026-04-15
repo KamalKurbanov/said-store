@@ -1,0 +1,177 @@
+/* Sidebar Uber-inspired styles */
+
+.sidebar {
+  background-color: #ffffff;
+}
+
+.sidebarHeader {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #efefef;
+}
+
+.sidebarHeaderCollapsed {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #efefef;
+}
+
+.sidebarTitle {
+  font-family: "UberMove", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.25rem; /* 20px */
+  font-weight: 700;
+  line-height: 1.40;
+  color: #000000;
+  margin: 0;
+}
+
+.iconButton {
+  color: #000000;
+  border-radius: 999px;
+  transition: background-color 200ms ease;
+}
+
+.iconButton:hover {
+  background-color: #f3f3f3;
+}
+
+.menuList {
+  padding-top: 8px;
+}
+
+.menuItem {
+  margin-bottom: 4px;
+}
+
+.menuItemButton {
+  margin: 0 8px;
+  border-radius: 999px;
+  transition: background-color 200ms ease;
+}
+
+.menuItemButtonSelected {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.menuItemButtonSelected:hover {
+  background-color: #4b4b4b;
+}
+
+.menuItemIcon {
+  color: #000000;
+  min-width: 0;
+}
+
+.menuItemIconDefault {
+  color: #4b4b4b;
+}
+
+.menuItemText {
+  font-family: "UberMoveText", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.9375rem; /* 15px */
+  font-weight: 500;
+  line-height: 1.33;
+  color: #000000;
+}
+
+.menuItemTextSelected {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.userSection {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-start;
+}
+
+.userSectionCollapsed {
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userAvatar {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.userName {
+  font-family: "UberMoveText", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.875rem; /* 14px */
+  font-weight: 700;
+  line-height: 1.14;
+  color: #000000;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userEmail {
+  font-family: "UberMoveText", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.75rem; /* 12px */
+  font-weight: 400;
+  line-height: 1.67;
+  color: #afafaf;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.userRole {
+  font-family: "UberMoveText", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.625rem; /* 10px */
+  font-weight: 700;
+  line-height: 1.67;
+  color: #000000;
+  background-color: #efefef;
+  padding: 2px 6px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  margin-top: 2px;
+}
+
+.userRoleAdmin {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.userRoleModerator {
+  background-color: #4b4b4b;
+  color: #ffffff;
+}
+
+.actionsSection {
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.actionsSectionCollapsed {
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}

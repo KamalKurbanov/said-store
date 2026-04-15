@@ -1,0 +1,62 @@
+/* Dashboard Uber-inspired styles */
+
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+.appBar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #efefef;
+  box-shadow: none;
+  transition-property: width, margin;
+  transition-timing-function: ease;
+  transition-duration: 200ms;
+}
+
+.toolbar {
+  min-height: 48px;
+}
+
+.toolbarTitle {
+  font-family: "UberMoveText", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.9375rem; /* 15px */
+  font-weight: 500;
+  line-height: 1.33;
+  color: #000000;
+}
+
+.mainContent {
+  flex-grow: 1;
+  padding: 24px;
+  width: calc(100% - 260px);
+  margin-top: 48px;
+  transition-property: width, margin;
+  transition-timing-function: ease;
+  transition-duration: 200ms;
+  background-color: #ffffff;
+}
+
+.pageHeader {
+  text-align: left;
+  margin-bottom: 32px;
+}
+
+.pageTitle {
+  font-family: "UberMove", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 2.25rem; /* 36px */
+  font-weight: 700;
+  line-height: 1.22;
+  color: #000000;
+  margin: 0 0 8px 0;
+}
+
+.pageSubtitle {
+  font-family: "UberMoveText", "Inter", "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1rem; /* 16px */
+  font-weight: 400;
+  line-height: 1.50;
+  color: #4b4b4b;
+  margin: 0;
+}

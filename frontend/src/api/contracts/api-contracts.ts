@@ -15,10 +15,13 @@
 // ОБЩИЕ ТИПЫ
 // ─────────────────────────────────────────────────────────────
 
+export type UserRole = 'ADMIN' | 'MODERATOR' | 'USER';
+
 export interface User {
   id: string;
   email: string;
   name?: string;
+  role: UserRole;
   createdAt: string;
   updatedAt: string;
 }
@@ -112,3 +115,88 @@ export interface LoginRequest {
 
 // GET /api/health
 // → 200: { status: "ok", timestamp: string }
+
+// ─────────────────────────────────────────────────────────────
+// USER MANAGEMENT (Admin only)
+// ─────────────────────────────────────────────────────────────
+
+// GET /users
+// Headers: Authorization: Bearer <token>
+// Role: ADMIN
+// → 200: UserListItem[]
+// → 403: Forbidden
+
+// GET /users/all
+// Headers: Authorization: Bearer <token>
+// Role: ADMIN, MODERATOR
+// → 200: UserListItem[]
+
+// PATCH /users/:id/role
+// Headers: Authorization: Bearer <token>
+// Role: ADMIN
+// Body: { role: UserRole }
+// → 200: UserListItem
+
+// DELETE /users/:id
+// Headers: Authorization: Bearer <token>
+// Role: ADMIN
+// → 200: { id: string, email: string }
+
+export interface UserListItem {
+  id: string;
+  email: string;
+  name?: string;
+  role: UserRole;
+  createdAt: string;
+}
+
+// ─────────────────────────────────────────────────────────────
+// RESTAURANTS (Admin only)
+// ─────────────────────────────────────────────────────────────
+
+export interface RestaurantOwner {
+  id: string;
+  email: string;
+  name?: string;
+}
+
+export interface Restaurant {
+  id: string;
+  name: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  description?: string;
+  imageUrl?: string;
+  isActive: boolean;
+  ownerId?: string;
+  owner?: RestaurantOwner;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    transactions: number;
+    reports: number;
+  };
+}
+
+export interface CreateRestaurantRequest {
+  name: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  description?: string;
+  imageUrl?: string;
+  isActive?: boolean;
+  ownerId?: string;
+}
+
+export interface UpdateRestaurantRequest {
+  name?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  description?: string;
+  imageUrl?: string;
+  isActive?: boolean;
+  ownerId?: string;
+}

@@ -1,14 +1,12 @@
 import React, { useMemo, useState, useCallback } from 'react';
+import { useAuth } from '../context/AuthContext';
 import {
   Box,
-  Container,
   Typography,
-  Paper,
   Alert,
   Snackbar,
   Card,
   CardContent,
-  Grid,
   Chip,
   Button,
   TextField,
@@ -41,6 +39,7 @@ import {
   useExportTransactions,
 } from '../api/api-hooks';
 import type { Transaction } from '../api/api-client';
+import styles from './PnLReport.module.css';
 
 const formatCurrency = (value: number): string =>
   new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(value);
@@ -48,15 +47,13 @@ const formatCurrency = (value: number): string =>
 const SummaryCard: React.FC<{ title: string; value: number; icon: React.ReactNode; color: string }> = ({
   title, value, icon, color,
 }) => (
-  <Card>
-    <CardContent>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-        <Box sx={{ bgcolor: `${color}.lighter`, color: `${color}.main`, p: 1, borderRadius: 1 }}>{icon}</Box>
-      </Box>
-      <Typography color="text.secondary" variant="body2">{title}</Typography>
-      <Typography variant="h5" sx={{ fontWeight: 'bold' }}>{formatCurrency(value)}</Typography>
-    </CardContent>
-  </Card>
+  <div className={styles.summaryCard}>
+    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+      <Box sx={{ bgcolor: `${color}.lighter`, color: `${color}.main`, p: 1, borderRadius: 1 }}>{icon}</Box>
+    </Box>
+    <Typography className={styles.summaryCardTitle}>{title}</Typography>
+    <Typography className={styles.summaryCardValue}>{formatCurrency(value)}</Typography>
+  </div>
 );
 
 const typeLabels: Record<string, string> = { income: 'Доход', expense: 'Расход' };
@@ -80,6 +77,12 @@ const PnLReport: React.FC = () => {
   const updateMutation = useUpdateTransaction();
   const deleteMutation = useDeleteTransaction();
   const exportMutation = useExportTransactions();
+  const { user } = useAuth();
+
+  const isAdmin = user?.role === 'ADMIN';
+
+  // Для ADMIN — выбранный ресторан для создания транзакции
+  const [restaurantId, setRestaurantId] = useState<string>(user?.restaurantId || '');
 
   // Форма добавления
   const [form, setForm] = useState(emptyForm);
@@ -102,6 +105,10 @@ const PnLReport: React.FC = () => {
       setError('Заполните категорию и сумму');
       return;
     }
+    if (!restaurantId) {
+      setError('Выберите ресторан в фильтре сверху');
+      return;
+    }
     try {
       await createMutation.mutateAsync({
         type: form.type,
@@ -110,6 +117,7 @@ const PnLReport: React.FC = () => {
         paymentMethod: form.paymentMethod,
         description: form.description || undefined,
         status: form.status,
+        restaurantId,
       });
       setForm(emptyForm);
       setShowForm(false);
@@ -213,7 +221,7 @@ const PnLReport: React.FC = () => {
         }
         return (
           <Chip
-            label={typeLabels[cell.getValue() as string] || cell.getValue()}
+            label={typeLabels[cell.getValue() as string] || (cell.getValue() as string)}
             color={typeColors[cell.getValue() as string] || 'default'}
             size="small"
           />
@@ -280,7 +288,7 @@ const PnLReport: React.FC = () => {
             </FormControl>
           );
         }
-        return <span>{paymentLabels[cell.getValue() as string] || cell.getValue()}</span>;
+        return <span>{paymentLabels[cell.getValue() as string] || (cell.getValue() as string)}</span>;
       },
     },
     {
@@ -325,7 +333,7 @@ const PnLReport: React.FC = () => {
         }
         return (
           <Chip
-            label={statusLabels[cell.getValue() as string] || cell.getValue()}
+            label={statusLabels[cell.getValue() as string] || (cell.getValue() as string)}
             color={statusColors[cell.getValue() as string] || 'default'}
             size="small"
           />
@@ -335,37 +343,38 @@ const PnLReport: React.FC = () => {
   ], [editingId, editForm, editChange]);
 
   return (
-    <Container maxWidth="xl">
-      <Box sx={{ mb: 4, textAlign: 'center' }}>
-        <Typography variant="h3" sx={{ fontWeight: 'bold', color: 'primary.main' }}>P&L Доход и расход</Typography>
-        <Typography variant="h6" color="text.secondary">
+    <div className={styles.pageContainer}>
+      {/* Header */}
+      <div className={styles.pageHeader}>
+        <Typography className={styles.pageTitle}>P&L Доход и расход</Typography>
+        <Typography className={styles.pageSubtitle}>
           Управляйте доходами и расходами
         </Typography>
-      </Box>
+      </div>
 
       {/* Summary Cards */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={6} md={3}><SummaryCard title="Доход" value={summary.totalIncome} icon={<TrendingUpIcon />} color="success" /></Grid>
-        <Grid item xs={6} md={3}><SummaryCard title="Расходы" value={summary.totalExpense} icon={<TrendingDownIcon />} color="error" /></Grid>
-        <Grid item xs={6} md={3}><SummaryCard title="Прибыль" value={summary.netProfit} icon={<MoneyIcon />} color={summary.netProfit >= 0 ? 'success' : 'error'} /></Grid>
-        <Grid item xs={6} md={3}><SummaryCard title="Маржа" value={summary.margin} icon={<PercentIcon />} color="info" /></Grid>
-      </Grid>
+      <div className={styles.summaryGrid}>
+        <SummaryCard title="Доход" value={summary.totalIncome} icon={<TrendingUpIcon />} color="success" />
+        <SummaryCard title="Расходы" value={summary.totalExpense} icon={<TrendingDownIcon />} color="error" />
+        <SummaryCard title="Прибыль" value={summary.netProfit} icon={<MoneyIcon />} color={summary.netProfit >= 0 ? 'success' : 'error'} />
+        <SummaryCard title="Маржа" value={summary.margin} icon={<PercentIcon />} color="info" />
+      </div>
 
       {/* Add Transaction Form */}
-      <Paper elevation={3} sx={{ p: 3, borderRadius: 2, mb: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h5">Добавить транзакцию</Typography>
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <Typography className={styles.sectionTitle}>Добавить транзакцию</Typography>
           {!showForm && (
-            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowForm(true)}>
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowForm(true)} className={styles.appleButton}>
               Добавить
             </Button>
           )}
-        </Box>
+        </div>
 
         {showForm && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={2}>
+            <div className={styles.formGrid}>
+              <div>
                 <FormControl fullWidth size="small">
                   <InputLabel>Тип</InputLabel>
                   <Select value={form.type} label="Тип" onChange={(e) => handleChange('type', e.target.value)}>
@@ -373,14 +382,14 @@ const PnLReport: React.FC = () => {
                     <MenuItem value="expense">Расход</MenuItem>
                   </Select>
                 </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
+              </div>
+              <div>
                 <TextField fullWidth size="small" label="Категория" value={form.category} onChange={(e) => handleChange('category', e.target.value)} required />
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
+              </div>
+              <div>
                 <TextField fullWidth size="small" label="Сумма" type="number" value={form.amount} onChange={(e) => handleChange('amount', e.target.value)} required />
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
+              </div>
+              <div>
                 <FormControl fullWidth size="small">
                   <InputLabel>Способ оплаты</InputLabel>
                   <Select value={form.paymentMethod} label="Способ оплаты" onChange={(e) => handleChange('paymentMethod', e.target.value)}>
@@ -389,8 +398,8 @@ const PnLReport: React.FC = () => {
                     <MenuItem value="invoice">Счёт</MenuItem>
                   </Select>
                 </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
+              </div>
+              <div>
                 <FormControl fullWidth size="small">
                   <InputLabel>Статус</InputLabel>
                   <Select value={form.status} label="Статус" onChange={(e) => handleChange('status', e.target.value)}>
@@ -399,13 +408,13 @@ const PnLReport: React.FC = () => {
                     <MenuItem value="cancelled">Отменено</MenuItem>
                   </Select>
                 </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
+              </div>
+              <div>
                 <TextField fullWidth size="small" label="Описание" value={form.description} onChange={(e) => handleChange('description', e.target.value)} />
-              </Grid>
-            </Grid>
+              </div>
+            </div>
 
-            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+            <div className={styles.formActions}>
               <Button variant="outlined" color="error" onClick={() => { setForm(emptyForm); setShowForm(false); }}>
                 Отмена
               </Button>
@@ -418,15 +427,15 @@ const PnLReport: React.FC = () => {
               >
                 Сохранить
               </Button>
-            </Box>
+            </div>
           </Box>
         )}
-      </Paper>
+      </div>
 
       {/* Transactions Table */}
-      <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h5">Транзакции</Typography>
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <Typography className={styles.sectionTitle}>Транзакции</Typography>
           <Button
             variant="outlined"
             color="primary"
@@ -436,12 +445,13 @@ const PnLReport: React.FC = () => {
           >
             Выгрузить в Excel
           </Button>
-        </Box>
+        </div>
 
-        <MaterialReactTable
-          columns={columns}
-          data={transactions}
-          state={{ isLoading }}
+        <div className={styles.tableContainer}>
+          <MaterialReactTable
+            columns={columns}
+            data={transactions}
+            state={{ isLoading }}
           enableColumnFilters
           enableSorting
           enablePagination
@@ -485,8 +495,9 @@ const PnLReport: React.FC = () => {
               </Box>
             );
           }}
-        />
-      </Paper>
+          />
+        </div>
+      </div>
 
       <Snackbar open={success} autoHideDuration={4000} onClose={() => setSuccess(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
         <Alert severity="success">Операция выполнена успешно!</Alert>
@@ -494,7 +505,7 @@ const PnLReport: React.FC = () => {
       <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
         <Alert severity="error">{error}</Alert>
       </Snackbar>
-    </Container>
+    </div>
   );
 };
 

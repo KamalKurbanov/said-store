@@ -37,6 +37,9 @@ export class CreateTransactionDto {
   @IsEnum(TransactionStatusDto)
   @IsOptional()
   status?: TransactionStatusDto;
+
+  @IsString()
+  restaurantId: string;
 }
 
 export class UpdateTransactionDto {

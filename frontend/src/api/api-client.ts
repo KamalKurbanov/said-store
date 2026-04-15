@@ -5,6 +5,10 @@ import {
   LoginRequest,
   PnlReport,
   ReportItem,
+  UserListItem,
+  Restaurant,
+  CreateRestaurantRequest,
+  UpdateRestaurantRequest,
 } from './contracts/api-contracts';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
@@ -126,6 +130,7 @@ export interface CreateTransactionRequest {
   paymentMethod: 'card' | 'cash' | 'invoice';
   description?: string;
   status?: 'confirmed' | 'pending' | 'cancelled';
+  restaurantId: string;
 }
 
 export interface UpdateTransactionRequest {
@@ -162,7 +167,51 @@ export const transactionsApi = {
     const response = await fetch(`${API_URL}/api/transactions/export`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
-    if (!response.ok) throw new Error('Ошибка экспорта');
+    if (!response.ok) throw new Error('Export error');
     return await response.blob();
   },
+};
+
+// ─────────────────────────────────────────────────────────────
+// Users (Admin/Moderator)
+// ─────────────────────────────────────────────────────────────
+
+export const usersApi = {
+  list: () => request<UserListItem[]>('/users/all'),
+
+  updateRole: (id: string, role: 'ADMIN' | 'MODERATOR' | 'USER') =>
+    request<UserListItem>(`/users/${id}/role`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role }),
+    }),
+
+  remove: (id: string) =>
+    request<{ id: string; email: string }>(`/users/${id}`, {
+      method: 'DELETE',
+    }),
+};
+
+// ─────────────────────────────────────────────────────────────
+// Restaurants (Admin only)
+// ─────────────────────────────────────────────────────────────
+
+export const restaurantsApi = {
+  list: () => request<Restaurant[]>('/restaurants'),
+
+  create: (data: CreateRestaurantRequest) =>
+    request<Restaurant>('/restaurants', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: string, data: UpdateRestaurantRequest) =>
+    request<Restaurant>(`/restaurants/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  remove: (id: string) =>
+    request<{ id: string; name: string }>(`/restaurants/${id}`, {
+      method: 'DELETE',
+    }),
 };

@@ -1,9 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 
 interface User {
   id: string;
   email: string;
   name?: string;
+  role: 'ADMIN' | 'MODERATOR' | 'USER';
+  restaurantId?: string | null;
 }
 
 interface AuthContextType {
@@ -12,6 +14,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name?: string) => Promise<void>;
   logout: () => void;
+  fetchMe: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -32,6 +35,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, []);
 
+  // Внутренняя функция — вызывает /users/me с переданным токеном
+  const fetchMeInternal = async (tokenToUse: string) => {
+    try {
+      const response = await fetch(`${API_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${tokenToUse}` },
+      });
+      if (!response.ok) return;
+
+      const userData = await response.json();
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+    } catch (err) {
+      // ignore
+    }
+  };
+
   const login = async (email: string, password: string) => {
     const data = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
@@ -49,6 +68,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(data);
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data));
+
+    // Сразу после логина — получаем актуальные данные (с restaurantId)
+    await fetchMeInternal(data.token);
   };
 
   const register = async (email: string, password: string, name?: string) => {
@@ -68,6 +90,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(data);
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data));
+
+    // Сразу после регистрации — получаем актуальные данные
+    await fetchMeInternal(data.token);
   };
 
   const logout = () => {
@@ -77,6 +102,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem('user');
   };
 
+  const fetchMe = useCallback(async () => {
+    const storedToken = localStorage.getItem('token');
+    if (!storedToken) return;
+
+    try {
+      const response = await fetch(`${API_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${storedToken}` },
+      });
+      if (!response.ok) return;
+
+      const userData = await response.json();
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+    } catch (err) {
+      // ignore — пользователь уже залогинен, просто не удалось обновить данные
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -85,6 +128,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         login,
         register,
         logout,
+        fetchMe,
         isAuthenticated: !!token,
       }}
     >

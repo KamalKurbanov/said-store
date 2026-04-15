@@ -1,78 +1,48 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { authApi, reportsApi, transactionsApi } from '../api/api-client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { authApi, reportsApi, transactionsApi, usersApi, restaurantsApi } from './api-client';
 
 // ─────────────────────────────────────────────────────────────
 // Auth
 // ─────────────────────────────────────────────────────────────
 
-export function useMe() {
-  return useQuery({
-    queryKey: ['me'],
-    queryFn: authApi.me,
+export const useAuthMe = () =>
+  useQuery({
+    queryKey: ['auth', 'me'],
+    queryFn: () => authApi.me(),
     retry: false,
   });
-}
-
-export function useRegister() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: authApi.register,
-    onSuccess: (data) => {
-      queryClient.setQueryData(['me'], data);
-    },
-  });
-}
-
-export function useLogin() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: authApi.login,
-    onSuccess: (data) => {
-      queryClient.setQueryData(['me'], data);
-    },
-  });
-}
 
 // ─────────────────────────────────────────────────────────────
-// Reports
+// P&L Reports
 // ─────────────────────────────────────────────────────────────
 
-export function useReports() {
-  return useQuery({
-    queryKey: ['reports'],
-    queryFn: reportsApi.list,
-  });
-}
-
-export function useUploadReport() {
+export const useUploadReport = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: reportsApi.upload,
+    mutationFn: (file: File) => reportsApi.upload(file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reports'] });
     },
   });
-}
+};
 
-export function useSampleReport() {
-  return useQuery({
-    queryKey: ['sample-report'],
-    queryFn: () => reportsApi.sample().then((r) => r.pnl),
+export const useReports = () =>
+  useQuery({
+    queryKey: ['reports'],
+    queryFn: () => reportsApi.list(),
   });
-}
 
 // ─────────────────────────────────────────────────────────────
 // Transactions
 // ─────────────────────────────────────────────────────────────
 
-export function useTransactions() {
-  return useQuery({
+export const useTransactions = () =>
+  useQuery({
     queryKey: ['transactions'],
-    queryFn: transactionsApi.list,
+    queryFn: () => transactionsApi.list(),
   });
-}
 
-export function useCreateTransaction() {
+export const useCreateTransaction = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: transactionsApi.create,
@@ -80,9 +50,9 @@ export function useCreateTransaction() {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
     },
   });
-}
+};
 
-export function useUpdateTransaction() {
+export const useUpdateTransaction = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
@@ -91,9 +61,9 @@ export function useUpdateTransaction() {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
     },
   });
-}
+};
 
-export function useDeleteTransaction() {
+export const useDeleteTransaction = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: transactionsApi.remove,
@@ -101,21 +71,81 @@ export function useDeleteTransaction() {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
     },
   });
-}
+};
 
-export function useExportTransactions() {
-  return useMutation({
+export const useExportTransactions = () =>
+  useMutation({
     mutationFn: transactionsApi.exportExcel,
-    onSuccess: async (blob) => {
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      const date = new Date().toISOString().slice(0, 10);
-      link.setAttribute('download', `pnl_report_${date}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+  });
+
+// ─────────────────────────────────────────────────────────────
+// Users (Admin)
+// ─────────────────────────────────────────────────────────────
+
+export const useUsers = () =>
+  useQuery({
+    queryKey: ['users'],
+    queryFn: usersApi.list,
+  });
+
+export const useUpdateUserRole = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, role }: { id: string; role: 'ADMIN' | 'MODERATOR' | 'USER' }) =>
+      usersApi.updateRole(id, role),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
   });
-}
+};
+
+export const useDeleteUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: usersApi.remove,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+};
+
+// ─────────────────────────────────────────────────────────────
+// Restaurants (Admin)
+// ─────────────────────────────────────────────────────────────
+
+export const useRestaurants = () =>
+  useQuery({
+    queryKey: ['restaurants'],
+    queryFn: restaurantsApi.list,
+  });
+
+export const useCreateRestaurant = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: restaurantsApi.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['restaurants'] });
+    },
+  });
+};
+
+export const useUpdateRestaurant = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      restaurantsApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['restaurants'] });
+    },
+  });
+};
+
+export const useDeleteRestaurant = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: restaurantsApi.remove,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['restaurants'] });
+    },
+  });
+};

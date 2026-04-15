@@ -1,13 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: { email: string; password: string; name?: string }) {
+  async create(data: { email: string; password: string; name?: string; role?: Role }) {
     return this.prisma.user.create({
-      data,
+      data: {
+        ...data,
+        role: data.role || Role.USER,
+      },
     });
   }
 
@@ -20,7 +24,75 @@ export class UsersService {
   async findById(id: string) {
     return this.prisma.user.findUnique({
       where: { id },
-      select: { id: true, email: true, name: true, createdAt: true },
+      select: { id: true, email: true, name: true, role: true, restaurantId: true, createdAt: true },
+    });
+  }
+
+  async getMe(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        restaurantId: true,
+        restaurant: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
+            imageUrl: true,
+          },
+        },
+        createdAt: true,
+      },
+    });
+  }
+
+  async findAll() {
+    return this.prisma.user.findMany({
+      select: { id: true, email: true, name: true, role: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async updateRole(userId: string, role: Role) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    // Prevent modifying admin role
+    if (user.role === Role.ADMIN) {
+      throw new ForbiddenException('Cannot modify admin role');
+    }
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { role },
+      select: { id: true, email: true, name: true, role: true },
+    });
+  }
+
+  async deleteUser(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    // Prevent deleting admin
+    if (user.role === Role.ADMIN) {
+      throw new ForbiddenException('Cannot delete admin');
+    }
+    return this.prisma.user.delete({
+      where: { id: userId },
+      select: { id: true, email: true },
+    });
+  }
+
+  async assignUserToRestaurant(userId: string, restaurantId: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { restaurantId },
+      select: { id: true, email: true, name: true, role: true, restaurantId: true },
     });
   }
 }

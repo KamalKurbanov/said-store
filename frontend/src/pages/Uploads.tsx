@@ -1,17 +1,14 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import {
   Box,
-  Container,
   Typography,
-  Paper,
   Alert,
   Snackbar,
   Button,
   CircularProgress,
-  Chip,
   Card,
   CardContent,
-  Grid,
+  Chip,
 } from '@mui/material';
 import {
   CloudUpload as CloudUploadIcon,
@@ -29,6 +26,7 @@ import {
 import { useUploadReport, useReports, useDeleteTransaction } from '../api/api-hooks';
 import FileUpload from '../components/FileUpload';
 import type { Transaction } from '../api/api-client';
+import styles from './Uploads.module.css';
 
 const formatCurrency = (value: number): string =>
   new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(value);
@@ -36,15 +34,13 @@ const formatCurrency = (value: number): string =>
 const SummaryCard: React.FC<{ title: string; value: number; icon: React.ReactNode; color: string }> = ({
   title, value, icon, color,
 }) => (
-  <Card>
-    <CardContent>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-        <Box sx={{ bgcolor: `${color}.lighter`, color: `${color}.main`, p: 1, borderRadius: 1 }}>{icon}</Box>
-      </Box>
-      <Typography color="text.secondary" variant="body2">{title}</Typography>
-      <Typography variant="h5" sx={{ fontWeight: 'bold' }}>{formatCurrency(value)}</Typography>
-    </CardContent>
-  </Card>
+  <div className={styles.summaryCard}>
+    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+      <Box sx={{ bgcolor: `${color}.lighter`, color: `${color}.main`, p: 1, borderRadius: 1 }}>{icon}</Box>
+    </Box>
+    <Typography className={styles.summaryCardTitle}>{title}</Typography>
+    <Typography className={styles.summaryCardValue}>{formatCurrency(value)}</Typography>
+  </div>
 );
 
 const typeLabels: Record<string, string> = { income: 'Доход', expense: 'Расход' };
@@ -158,7 +154,7 @@ const Uploads: React.FC = () => {
       header: 'Тип',
       size: 110,
       Cell: ({ cell }) => (
-        <Chip label={typeLabels[cell.getValue() as string] || cell.getValue()} color={typeColors[cell.getValue() as string] || 'default'} size="small" />
+        <Chip label={typeLabels[cell.getValue() as string] || (cell.getValue() as string)} color={typeColors[cell.getValue() as string] || 'default'} size="small" />
       ),
     },
     { accessorKey: 'category', header: 'Категория', size: 170 },
@@ -172,7 +168,7 @@ const Uploads: React.FC = () => {
       accessorKey: 'paymentMethod',
       header: 'Способ оплаты',
       size: 140,
-      Cell: ({ cell }) => <span>{paymentLabels[cell.getValue() as string] || cell.getValue()}</span>,
+      Cell: ({ cell }) => <span>{paymentLabels[cell.getValue() as string] || (cell.getValue() as string)}</span>,
     },
     {
       accessorKey: 'description',
@@ -185,7 +181,7 @@ const Uploads: React.FC = () => {
       header: 'Статус',
       size: 140,
       Cell: ({ cell }) => (
-        <Chip label={statusLabels[cell.getValue() as string] || cell.getValue()} color={statusColors[cell.getValue() as string] || 'default'} size="small" />
+        <Chip label={statusLabels[cell.getValue() as string] || (cell.getValue() as string)} color={statusColors[cell.getValue() as string] || 'default'} size="small" />
       ),
     },
   ], []);
@@ -200,105 +196,102 @@ const Uploads: React.FC = () => {
   ], []);
 
   return (
-    <Container maxWidth="xl" sx={{ pb: 4 }}>
-      <Box sx={{ mb: 4, textAlign: 'center' }}>
-        <Typography variant="h3" sx={{ fontWeight: 'bold', color: 'primary.main' }}>Загрузки</Typography>
-        <Typography variant="h6" color="text.secondary">
+    <div className={styles.pageContainer}>
+      <div className={styles.pageHeader}>
+        <Typography className={styles.pageTitle}>Загрузки</Typography>
+        <Typography className={styles.pageSubtitle}>
           Загрузите Excel/CSV файл для формирования P&L отчёта
         </Typography>
-      </Box>
+      </div>
 
       {/* Upload */}
-      <Paper elevation={3} sx={{ p: 4, mb: 4, borderRadius: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <CloudUploadIcon sx={{ fontSize: 40, mr: 2, color: 'primary.main' }} />
-          <Typography variant="h5">Загрузка файла</Typography>
-        </Box>
-        <FileUpload onFileUpload={handleFileUpload} loading={uploadMutation.isPending} />
-        {uploadMutation.isPending && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-            <CircularProgress /><Typography sx={{ ml: 2 }}>Обработка...</Typography>
-          </Box>
-        )}
-      </Paper>
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <CloudUploadIcon className={styles.sectionIcon} sx={{ fontSize: 32 }} />
+          <Typography className={styles.sectionTitle}>Загрузка файла</Typography>
+        </div>
+        <div className={styles.uploadSection}>
+          <FileUpload onFileUpload={handleFileUpload} loading={uploadMutation.isPending} />
+          {uploadMutation.isPending && (
+            <div className={styles.loadingContainer}>
+              <CircularProgress />
+              <Typography>Обработка...</Typography>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* P&L Report from uploaded file */}
       {pnlData && (
         <>
           {/* Summary */}
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid item xs={6} md={3}><SummaryCard title="Доход" value={pnlData.summary.totalIncome} icon={<TrendingUpIcon />} color="success" /></Grid>
-            <Grid item xs={6} md={3}><SummaryCard title="Расходы" value={pnlData.summary.totalExpense} icon={<TrendingDownIcon />} color="error" /></Grid>
-            <Grid item xs={6} md={3}><SummaryCard title="Прибыль" value={pnlData.summary.netProfit} icon={<MoneyIcon />} color={pnlData.summary.netProfit >= 0 ? 'success' : 'error'} /></Grid>
-            <Grid item xs={6} md={3}><SummaryCard title="Маржа" value={pnlData.summary.margin} icon={<PercentIcon />} color="info" /></Grid>
-          </Grid>
+          <div className={styles.summaryGrid}>
+            <SummaryCard title="Доход" value={pnlData.summary.totalIncome} icon={<TrendingUpIcon />} color="success" />
+            <SummaryCard title="Расходы" value={pnlData.summary.totalExpense} icon={<TrendingDownIcon />} color="error" />
+            <SummaryCard title="Прибыль" value={pnlData.summary.netProfit} icon={<MoneyIcon />} color={pnlData.summary.netProfit >= 0 ? 'success' : 'error'} />
+            <SummaryCard title="Маржа" value={pnlData.summary.margin} icon={<PercentIcon />} color="info" />
+          </div>
 
           {/* Charts */}
-          <Grid container spacing={3} sx={{ mb: 3 }}>
+          <div className={styles.chartsGrid}>
             {/* Monthly Income/Expense Bar */}
-            <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 3, borderRadius: 2 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Доходы и расходы по месяцам</Typography>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={pnlData.monthly}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip formatter={(v: number) => formatCurrency(v)} />
-                    <Legend />
-                    <Bar dataKey="income" name="Доход" fill="#4caf50" />
-                    <Bar dataKey="expense" name="Расход" fill="#f44336" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </Paper>
-            </Grid>
+            <div className={styles.chartCard}>
+              <Typography className={styles.chartTitle}>Доходы и расходы по месяцам</Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={pnlData.monthly}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                  <Legend />
+                  <Bar dataKey="income" name="Доход" fill="#34c759" />
+                  <Bar dataKey="expense" name="Расход" fill="#ff3b30" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
 
             {/* Monthly Profit Line */}
-            <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 3, borderRadius: 2 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Прибыль по месяцам</Typography>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={pnlData.monthly}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip formatter={(v: number) => formatCurrency(v)} />
-                    <Legend />
-                    <Line type="monotone" dataKey="profit" name="Прибыль" stroke="#1976d2" strokeWidth={2} dot={{ r: 4 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Paper>
-            </Grid>
+            <div className={styles.chartCard}>
+              <Typography className={styles.chartTitle}>Прибыль по месяцам</Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={pnlData.monthly}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                  <Legend />
+                  <Line type="monotone" dataKey="profit" name="Прибыль" stroke="#0071e3" strokeWidth={2} dot={{ r: 4 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
 
             {/* Category Pie */}
-            <Grid item xs={12}>
-              <Paper sx={{ p: 3, borderRadius: 2 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Расходы по категориям</Typography>
-                <ResponsiveContainer width="100%" height={350}>
-                  <PieChart>
-                    <Pie
-                      data={pnlData.byCategory.filter((c) => c.type === 'expense')}
-                      dataKey="total"
-                      nameKey="category"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={120}
-                      label={({ category, total }) => `${category}: ${formatCurrency(total)}`}
-                    >
-                      {pnlData.byCategory.filter((c) => c.type === 'expense').map((_, i) => (
-                        <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(v: number) => formatCurrency(v)} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Paper>
-            </Grid>
-          </Grid>
+            <div className={styles.chartCard}>
+              <Typography className={styles.chartTitle}>Расходы по категориям</Typography>
+              <ResponsiveContainer width="100%" height={350}>
+                <PieChart>
+                  <Pie
+                    data={pnlData.byCategory.filter((c) => c.type === 'expense')}
+                    dataKey="total"
+                    nameKey="category"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={120}
+                    label={({ category, total }) => `${category}: ${formatCurrency(total)}`}
+                  >
+                    {pnlData.byCategory.filter((c) => c.type === 'expense').map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
           {/* Transactions Table */}
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 2, mb: 3 }}>
-            <Typography variant="h5" sx={{ mb: 2 }}>Транзакции из файла</Typography>
+          <div className={styles.tableSection}>
+            <Typography className={styles.tableTitle}>Транзакции из файла</Typography>
             <MaterialReactTable
               columns={transactionColumns}
               data={pnlData.transactions}
@@ -311,13 +304,13 @@ const Uploads: React.FC = () => {
               enableHiding
               muiTableBodyRowProps={{ hover: true }}
             />
-          </Paper>
+          </div>
         </>
       )}
 
       {/* Reports History */}
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-        <Typography variant="h5" sx={{ mb: 3 }}>История загрузок</Typography>
+      <div className={styles.tableSection}>
+        <Typography className={styles.tableTitle}>История загрузок</Typography>
         <MaterialReactTable
           columns={reportsColumns}
           data={reports ?? []}
@@ -343,7 +336,7 @@ const Uploads: React.FC = () => {
             </Button>
           )}
         />
-      </Paper>
+      </div>
 
       <Snackbar open={success} autoHideDuration={4000} onClose={() => setSuccess(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
         <Alert severity="success">Файл обработан! P&L отчёт сформирован.</Alert>
@@ -351,7 +344,7 @@ const Uploads: React.FC = () => {
       <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
         <Alert severity="error">{error}</Alert>
       </Snackbar>
-      </Container>
+    </div>
   );
 };
 

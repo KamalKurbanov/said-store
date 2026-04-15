@@ -8,28 +8,61 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  reports   PnlReport[]
+  id           String        @id @default(uuid())
+  email        String        @unique
+  password     String
+  name         String?
+  role         Role          @default(USER)
+  restaurantId String?
+  restaurant   Restaurant?   @relation("UserRestaurant", fields: [restaurantId], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  reports      PnlReport[]
+  transactions Transaction[]
+  ownedRestaurants Restaurant[] @relation("RestaurantOwner")
+}
+
+model Restaurant {
+  id          String        @id @default(uuid())
+  name        String
+  address     String?
+  phone       String?
+  email       String?
+  description String?       @db.Text
+  imageUrl    String?
+  isActive    Boolean       @default(true)
+  ownerId     String?
+  owner       User?         @relation("RestaurantOwner", fields: [ownerId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  reports     PnlReport[]
+  transactions Transaction[]
+  users       User[]        @relation("UserRestaurant")
+
+  @@index([ownerId])
+  @@index([isActive])
 }
 
 model PnlReport {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  filename  String
-  data      Json
-  createdAt DateTime @default(now())
+  id           String       @id @default(uuid())
+  userId       String?
+  user         User?        @relation(fields: [userId], references: [id])
+  restaurantId String?
+  restaurant   Restaurant?  @relation(fields: [restaurantId], references: [id])
+  filename     String
+  data         Json
+  createdAt    DateTime     @default(now())
 
   @@index([userId])
+  @@index([restaurantId])
 }
 
 model Transaction {
   id            String   @id @default(uuid())
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  restaurantId  String?
+  restaurant    Restaurant? @relation(fields: [restaurantId], references: [id])
   date          DateTime @default(now())
   type          TransactionType
   category      String
@@ -40,6 +73,8 @@ model Transaction {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  @@index([userId])
+  @@index([restaurantId])
   @@index([type])
   @@index([status])
   @@index([createdAt])
@@ -60,4 +95,10 @@ enum TransactionStatus {
   CONFIRMED
   PENDING
   CANCELLED
+}
+
+enum Role {
+  ADMIN      // Main admin — full access
+  MODERATOR  // Sub-admin — limited access
+  USER       // Regular user — basic access
 }
