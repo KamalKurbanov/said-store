@@ -24,12 +24,12 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: coffe-dashbord-backend
-    ports:
-      - "4000:4000"
+    expose:
+      - "4000"
     environment:
       NODE_ENV: production
       PORT: 4000
-      FRONTEND_URL: http://localhost:3000
+      FRONTEND_URL: http://localhost
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-coffe_dashbord}?schema=public
       JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-change-in-production}
       JWT_EXPIRES_IN: 2d
@@ -46,10 +46,9 @@ services:
       dockerfile: Dockerfile
     container_name: coffe-dashbord-frontend
     ports:
-      - "3000:3000"
+      - "80:80"
     environment:
-      REACT_APP_API_URL: http://localhost:4000
-      CHOKIDAR_USEPOLLING: "true"
+      REACT_APP_API_URL: /api
     depends_on:
       - backend
     restart: unless-stopped
