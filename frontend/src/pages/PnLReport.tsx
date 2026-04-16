@@ -5,8 +5,6 @@ import {
   Typography,
   Alert,
   Snackbar,
-  Card,
-  CardContent,
   Chip,
   Button,
   TextField,
@@ -79,10 +77,8 @@ const PnLReport: React.FC = () => {
   const exportMutation = useExportTransactions();
   const { user } = useAuth();
 
-  const isAdmin = user?.role === 'ADMIN';
-
   // Для ADMIN — выбранный ресторан для создания транзакции
-  const [restaurantId, setRestaurantId] = useState<string>(user?.restaurantId || '');
+  const [restaurantId] = useState<string>(user?.restaurantId || '');
 
   // Форма добавления
   const [form, setForm] = useState(emptyForm);

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Box,
   Typography,
@@ -6,8 +6,6 @@ import {
   Snackbar,
   Button,
   CircularProgress,
-  Card,
-  CardContent,
   Chip,
 } from '@mui/material';
 import {
