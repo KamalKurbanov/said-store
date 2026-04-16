@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM node:20-alpine as build
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
@@ -7,7 +7,8 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-RUN npm run build
+# Проверка наличия файлов перед билдом
+RUN ls -la && ls -la public/ && npm run build
 
 # Stage 2: Serve with Nginx
 FROM nginx:stable-alpine
