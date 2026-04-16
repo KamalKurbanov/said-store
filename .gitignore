@@ -96,7 +96,7 @@ storybook-static/
 out/
 
 # Gatsby
-public/
+# public/
 
 # Vite
 vite.config.js.timestamp-*

@@ -3,3 +3,6 @@ build
 .env
 *.log
 .DS_Store
+
+# Явно разрешаем public, если он игнорируется глобально
+!public/
