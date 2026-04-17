@@ -3,12 +3,14 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
+ARG REACT_APP_API_URL=/api
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
 COPY package*.json ./
 RUN npm install
 
 COPY . .
-# Проверка наличия файлов перед билдом
-RUN ls -la && ls -la public/ && npm run build
+RUN npm run build
 
 # Stage 2: Serve with Nginx
 FROM nginx:stable-alpine

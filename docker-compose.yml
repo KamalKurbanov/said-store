@@ -44,11 +44,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=/api
     container_name: coffe-dashbord-frontend
     ports:
       - "80:80"
-    environment:
-      REACT_APP_API_URL: /api
     depends_on:
       - backend
     restart: unless-stopped
