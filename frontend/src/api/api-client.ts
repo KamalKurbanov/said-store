@@ -11,7 +11,7 @@ import {
   UpdateRestaurantRequest,
 } from './contracts/api-contracts';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+const API_URL = process.env.REACT_APP_API_URL || '';
 
 function getToken(): string | null {
   return localStorage.getItem('token');
@@ -26,7 +26,10 @@ async function request<T>(
   url: string,
   options?: RequestInit,
 ): Promise<T> {
-  const response = await fetch(`${API_URL}${url}`, {
+  // Гарантируем, что путь начинается с /api, если это не полный URL
+  const targetUrl = url.startsWith('http') ? url : `${API_URL}/api${url}`;
+  
+  const response = await fetch(targetUrl, {
     headers: {
       'Content-Type': 'application/json',
       ...authHeaders(),
@@ -91,10 +94,10 @@ export const reportsApi = {
     });
   },
 
-  list: () => request<ReportItem[]>('/api/reports'),
+  list: () => request<ReportItem[]>('/reports'),
 
   sample: () =>
-    request<{ success: boolean; pnl: PnlReport }>('/api/pnl/sample'),
+    request<{ success: boolean; pnl: PnlReport }>('/pnl/sample'),
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -103,7 +106,7 @@ export const reportsApi = {
 
 export const healthApi = {
   check: () =>
-    request<{ status: string; timestamp: string }>('/api/health'),
+    request<{ status: string; timestamp: string }>('/health'),
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -143,22 +146,22 @@ export interface UpdateTransactionRequest {
 }
 
 export const transactionsApi = {
-  list: () => request<Transaction[]>('/api/transactions'),
+  list: () => request<Transaction[]>('/transactions'),
 
   create: (data: CreateTransactionRequest) =>
-    request<Transaction>('/api/transactions', {
+    request<Transaction>('/transactions', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
   update: (id: string, data: UpdateTransactionRequest) =>
-    request<Transaction>(`/api/transactions/${id}`, {
+    request<Transaction>(`/transactions/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
 
   remove: (id: string) =>
-    request<{ success: boolean; id: string }>(`/api/transactions/${id}`, {
+    request<{ success: boolean; id: string }>(`/transactions/${id}`, {
       method: 'DELETE',
     }),
 
