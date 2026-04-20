@@ -45,7 +45,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - REACT_APP_API_URL=/api
+        - VITE_API_URL=/api
     container_name: coffe-dashbord-frontend
     ports:
       - "80:80"
