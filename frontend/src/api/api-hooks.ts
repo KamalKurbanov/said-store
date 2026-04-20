@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { authApi, reportsApi, transactionsApi, usersApi, restaurantsApi } from './api-client';
+import { authApi, reportsApi, transactionsApi, usersApi, restaurantsApi, UpdateTransactionRequest } from './api-client';
 
 // ─────────────────────────────────────────────────────────────
 // Auth
@@ -45,7 +45,7 @@ export const useTransactions = () =>
 export const useCreateTransaction = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: transactionsApi.create,
+    mutationFn:  transactionsApi.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
     },
@@ -66,7 +66,7 @@ export const useUpdateTransaction = () => {
 export const useDeleteTransaction = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: transactionsApi.remove,
+    mutationFn: async (id: string) =>  transactionsApi.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
     },
