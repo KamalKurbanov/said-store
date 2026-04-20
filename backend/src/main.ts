@@ -6,7 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost'],
+    origin: true, // Разрешает любой origin, что безопасно при работе через Nginx на одном хосте
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
