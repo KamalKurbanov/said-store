@@ -113,6 +113,50 @@ export const healthApi = {
 // Transactions
 // ─────────────────────────────────────────────────────────────
 
+export const transactionsApi = {
+  list: () => request<Transaction[]>('/transactions'),
+
+  create: (data: CreateTransactionRequest) =>
+    request<Transaction>('/transactions', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: string, data: UpdateTransactionRequest) =>
+    request<Transaction>(`/transactions/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  remove: (id: string) =>
+    request<{ success: boolean; id: string }>(`/transactions/${id}`, {
+      method: 'DELETE',
+    }),
+
+  exportExcel: async () => {
+    const token = getToken();
+    const response = await fetch(`${API_URL}/api/transactions/export`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!response.ok) throw new Error('Export error');
+    return await response.blob();
+  },
+};
+
+
+// ─────────────────────────────────────────────────────────────
+// Health
+// ─────────────────────────────────────────────────────────────
+
+export const healthApi = {
+  check: () =>
+    request<{ status: string; timestamp: string }>('/health'),
+};
+
+// ─────────────────────────────────────────────────────────────
+// Transactions
+// ─────────────────────────────────────────────────────────────
+
 export interface Transaction {
   id: string;
   date: string;
