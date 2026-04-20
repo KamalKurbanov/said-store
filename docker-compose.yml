@@ -24,6 +24,9 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: coffe-dashbord-backend
+    depends_on:
+      db:
+        condition: service_healthy 
     expose:
       - "4000"
     environment:
