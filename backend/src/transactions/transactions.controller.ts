@@ -20,7 +20,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 
-@Controller('api/transactions')
+@Controller('transactions')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
