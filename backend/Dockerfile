@@ -19,4 +19,4 @@ ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
 
 # Прямой запуск команд вместо скрипта для гарантии выполнения миграций
-CMD sh -c "sleep 10 && npx prisma db push --accept-data-loss && npx prisma generate && npm run start:prod"
+CMD sh -c "sleep 10 && npx prisma db push --accept-data-loss && npx prisma generate && npm run start:prod && npm run prisma:seed"
