@@ -1,18 +1,48 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
+
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async create(data: { email: string; password: string; name?: string; role?: Role }) {
+    const email = 'admin@coffee.com';
+    const password = 'admin123';
+    const name = 'Admin';
+
+    
+
+    const existing = await this.prisma.user.findUnique({ where: { email } });
+    if (!existing) {
+       const hashedPassword = await bcrypt.hash(password, 10);
+
+        await this.prisma.user.create({
+          data: {
+            email,
+            password: hashedPassword,
+            name,
+            role: 'ADMIN',
+          },
+        });
+
+      console.log('create ADmin')
+    }
+
+
+
     return this.prisma.user.create({
       data: {
         ...data,
         role: data.role || Role.USER,
       },
     });
+
+  
+
+    
   }
 
   async findByEmail(email: string) {
